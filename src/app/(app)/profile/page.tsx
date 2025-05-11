@@ -1,12 +1,11 @@
 
 "use client";
 
-import { UserCircle2, Settings, LogOut, Mail, Phone as PhoneIcon, Droplets, Calendar } from 'lucide-react'; // Changed LogIn to LogOut
+import { UserCircle2, Settings, LogOut, Mail, Phone as PhoneIcon, Droplets, Calendar } from 'lucide-react'; 
 import { Button } from '@/components/ui/button';
-// import Link from 'next/link'; // Link might not be needed if logout is an action
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useToast } from '@/hooks/use-toast'; // For showing logout toast
+import { useToast } from '@/hooks/use-toast'; 
 
 
 interface UserProfile {
@@ -65,8 +64,8 @@ export default function ProfilePage() {
             </AvatarFallback>
           )}
         </Avatar>
-        <h1 className="text-2xl font-semibold text-primary-foreground">{mockUser.name}</h1>
-        <p className="text-sm text-muted-foreground">{mockUser.email}</p>
+        <h1 className="text-2xl font-semibold text-foreground">{mockUser.name}</h1>
+        {/* Email removed from here */}
       </div>
 
       <Card className="w-full max-w-md shadow-lg">
