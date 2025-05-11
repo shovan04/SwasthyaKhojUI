@@ -72,7 +72,7 @@ export function LocationModal({
               className="col-span-3"
             />
           </div>
-          <Button variant="outline" onClick={() => { onDetectLocation(); onClose(); }} className="w-full">
+          <Button variant="outline" onClick={() => { onDetectLocation(); }} className="w-full">
             <MapPin className="mr-2 h-4 w-4" /> Use Current Location (GPS)
           </Button>
         </div>
@@ -90,3 +90,4 @@ export function LocationModal({
     </Dialog>
   );
 }
+
