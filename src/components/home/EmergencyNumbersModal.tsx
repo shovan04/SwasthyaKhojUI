@@ -7,8 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
-  DialogClose,
+  // DialogFooter, // Removed
+  // DialogClose, // Removed
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Phone, Siren } from 'lucide-react';
@@ -61,13 +61,7 @@ export function EmergencyNumbersModal({ isOpen, onClose }: EmergencyNumbersModal
             </div>
           ))}
         </div>
-        <DialogFooter className="sm:justify-start">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">
-              Close
-            </Button>
-          </DialogClose>
-        </DialogFooter>
+        {/* DialogFooter and DialogClose Button removed as per request */}
       </DialogContent>
     </Dialog>
   );
