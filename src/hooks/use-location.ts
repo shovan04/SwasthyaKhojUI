@@ -7,20 +7,40 @@ import { useCallback, useEffect, useState } from 'react';
 const DEFAULT_LOCATION_NAME = "Villupuram, Tamil Nadu"; // Example default location
 const DEFAULT_COORDS: LocationCoordinates = { latitude: 11.9416, longitude: 79.4950 };
 
-// Mock reverse geocoding function
+// Reverse geocoding function using OpenStreetMap Nominatim API
 async function getAreaNameFromCoordinates(coords: LocationCoordinates): Promise<string> {
-  // In a real app, you would call a reverse geocoding API here.
-  // For this example, we'll return a mock name.
-  // This is a simplified mock. A real implementation would be more complex.
-  console.log('Reverse geocoding for:', coords);
-  if (coords.latitude === DEFAULT_COORDS.latitude && coords.longitude === DEFAULT_COORDS.longitude) {
-    return "Villupuram City Center";
+  if (!coords || typeof coords.latitude !== 'number' || typeof coords.longitude !== 'number') {
+    console.error("Invalid coordinates provided for reverse geocoding:", coords);
+    return "Unknown Area (Invalid Coords)";
   }
-  // Simulate a slight variation for detected locations
-  if (coords.latitude && coords.longitude) {
+
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}&zoom=18&addressdetails=1`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'SwasthyaKhojApp/1.0 (your-email@example.com)' // Replace with your app info and contact
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`Nominatim API request failed with status ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (data && data.display_name) {
+      return data.display_name;
+    } else if (data && data.address) {
+      // Fallback to constructing from address parts if display_name is not available
+      const { road, suburb, city, town, village, county, state, country } = data.address;
+      const parts = [road, suburb, city || town || village, county, state, country].filter(Boolean);
+      return parts.join(', ') || "Unknown Location";
+    }
+    return "Area Name Not Found";
+  } catch (error) {
+    console.error("Error during reverse geocoding:", error);
+    // Return a more user-friendly error or a generic name
     return `Area near Lat ${coords.latitude.toFixed(2)}, Lon ${coords.longitude.toFixed(2)}`;
   }
-  return "Unknown Area";
 }
 
 
@@ -36,10 +56,10 @@ export function useLocation() {
     if (typeof window !== 'undefined' && navigator.geolocation) {
       try {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
         });
         
-        const coords = {
+        const coords: LocationCoordinates = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         };
@@ -50,17 +70,22 @@ export function useLocation() {
           setCurrentLocationName(areaName);
         } catch (geocodeError) {
           console.error("Reverse geocoding failed:", geocodeError);
-          setCurrentLocationName("Detected Location (Area name unavailable)");
+          // If geocoding fails, still show that location was detected but name is unavailable.
+          setCurrentLocationName(`Detected: Lat ${coords.latitude.toFixed(2)}, Lon ${coords.longitude.toFixed(2)}`);
           setError("Could not fetch area name.");
         }
         
-        setIsLoading(false);
       } catch (err: any) {
-        console.warn(`ERROR(${err.code}): ${err.message}`);
+        console.warn(`Geolocation ERROR(${err.code}): ${err.message}`);
         // Fallback to default if permission denied or error
         setCurrentLocationName(DEFAULT_LOCATION_NAME);
         setCurrentCoordinates(DEFAULT_COORDS);
-        setError("Could not detect location. Using default.");
+        if (err.code === 1) { // PERMISSION_DENIED
+          setError("Location permission denied. Using default.");
+        } else {
+          setError("Could not detect location. Using default.");
+        }
+      } finally {
         setIsLoading(false);
       }
     } else {
@@ -73,25 +98,73 @@ export function useLocation() {
   }, []);
 
   useEffect(() => {
-    // Only fetch location if a name hasn't been set yet (e.g., by manual input or persistence)
     if (currentLocationName === null) {
       fetchUserLocation();
     } else {
-      // If a location name is already present, ensure loading state is false.
       setIsLoading(false);
     }
-    // Adding currentLocationName to dependency array to correctly handle cases where it might be set by other means.
-    // The 'if (currentLocationName === null)' check prevents re-fetching if it's already set.
   }, [fetchUserLocation, currentLocationName]);
 
-  const setManualLocation = useCallback((name: string, coords?: LocationCoordinates) => {
+  const setManualLocation = useCallback(async (name: string, coords?: LocationCoordinates) => {
+    setIsLoading(true);
     setCurrentLocationName(name);
-    // If coords are not provided with manual location, we might want to clear them or use a default.
-    // For now, let's keep existing or use default if name implies new search.
-    setCurrentCoordinates(coords || null); 
+    if (coords) {
+      setCurrentCoordinates(coords);
+    } else {
+      // If no coords provided for manual name, try to geocode the name
+      // This is a forward geocoding step, which is more complex.
+      // For now, we'll just set the name and clear/keep coordinates.
+      // In a real app, you'd call a forward geocoding API here.
+      // For simplicity, if no coords, let's clear them.
+      setCurrentCoordinates(null); 
+      console.warn("Manual location set without coordinates. Consider implementing forward geocoding.");
+    }
     setIsLoading(false);
     setError(null);
   }, []);
+  
+  const handleDetectLocationAndUpdateModal = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+        try {
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
+            });
+            const coords = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            };
+            setCurrentCoordinates(coords);
+            const areaName = await getAreaNameFromCoordinates(coords);
+            setCurrentLocationName(areaName); // This will update the state used by the modal
+            return areaName; // Return the name for the modal to use directly
+        } catch (err) {
+            console.warn("Error detecting location for modal update:", err);
+            setCurrentLocationName(DEFAULT_LOCATION_NAME); // Fallback
+            setCurrentCoordinates(DEFAULT_COORDS);
+            setError("Could not detect location. Using default.");
+            return DEFAULT_LOCATION_NAME;
+        } finally {
+            setIsLoading(false);
+        }
+    } else {
+        setCurrentLocationName(DEFAULT_LOCATION_NAME);
+        setCurrentCoordinates(DEFAULT_COORDS);
+        setError("Geolocation not supported.");
+        setIsLoading(false);
+        return DEFAULT_LOCATION_NAME;
+    }
+  }, [setIsLoading, setError, setCurrentCoordinates, setCurrentLocationName]);
 
-  return { currentLocationName, currentCoordinates, isLoading, error, setManualLocation, refreshLocation: fetchUserLocation };
+
+  return { 
+    currentLocationName, 
+    currentCoordinates, 
+    isLoading, 
+    error, 
+    setManualLocation, 
+    refreshLocation: fetchUserLocation,
+    detectLocationForModal: handleDetectLocationAndUpdateModal 
+  };
 }

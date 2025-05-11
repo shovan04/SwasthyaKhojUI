@@ -12,7 +12,7 @@ interface AppHeaderProps {
   currentLocationName: string | null;
   isLoadingLocation: boolean;
   onSetLocation: (locationName: string) => void;
-  onDetectLocation: () => void;
+  onDetectLocation: () => Promise<string | void>; // Now expects a promise
 }
 
 export function AppHeader({
@@ -31,7 +31,7 @@ export function AppHeader({
 
 
         <div className="flex items-center space-x-2">
-          {isLoadingLocation ? (
+          {isLoadingLocation && !currentLocationName ? (
             <Skeleton className="h-6 w-32 rounded-md" />
           ) : (
             <Button
@@ -41,7 +41,7 @@ export function AppHeader({
               title="Change location"
             >
               <MapPin className="h-4 w-4 mr-1 shrink-0" />
-              <span className="truncate max-w-[100px] sm:max-w-[150px] inline">
+              <span className="truncate max-w-[100px] sm:max-w-[150px] md:max-w-[200px] inline">
                 {currentLocationName || 'Set Location'}
               </span>
               <Edit3 className="h-3 w-3 ml-1 sm:ml-2 text-muted-foreground/70 shrink-0" />
@@ -55,8 +55,8 @@ export function AppHeader({
         currentLocationName={currentLocationName}
         onSetLocation={onSetLocation}
         onDetectLocation={onDetectLocation}
+        isLoadingLocation={isLoadingLocation}
       />
     </header>
   );
 }
-

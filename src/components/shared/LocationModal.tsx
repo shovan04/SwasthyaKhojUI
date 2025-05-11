@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,14 +14,15 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { MapPin, RefreshCw } from 'lucide-react'; // Added RefreshCw for detect location button
+import { MapPin, RefreshCw, Loader2 } from 'lucide-react'; // Added RefreshCw for detect location button
 
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentLocationName: string | null;
   onSetLocation: (locationName: string) => void;
-  onDetectLocation: () => void; // This should trigger the location detection logic in the hook
+  onDetectLocation: () => Promise<string | void>; // Changed to Promise to handle async name update
+  isLoadingLocation: boolean;
 }
 
 export function LocationModal({
@@ -30,15 +31,22 @@ export function LocationModal({
   currentLocationName,
   onSetLocation,
   onDetectLocation,
+  isLoadingLocation,
 }: LocationModalProps) {
   const [manualLocationInput, setManualLocationInput] = useState('');
+  const [isDetecting, setIsDetecting] = useState(false);
 
-  // Update the input field when the modal opens or the currentLocationName prop changes
   useEffect(() => {
     if (isOpen) {
-      setManualLocationInput(currentLocationName || '');
+      // Only update input if not currently detecting, to avoid overwriting "Detecting..."
+      if (!isDetecting) {
+        setManualLocationInput(currentLocationName || '');
+      }
+    } else {
+      // Reset detecting state when modal closes
+      setIsDetecting(false);
     }
-  }, [isOpen, currentLocationName]);
+  }, [isOpen, currentLocationName, isDetecting]);
 
   const handleSubmit = () => {
     if (manualLocationInput.trim()) {
@@ -47,24 +55,36 @@ export function LocationModal({
     }
   };
 
-  const handleDetectLocation = () => {
-    onDetectLocation(); // Call the hook's function to detect location
-    // The input field will update via useEffect when currentLocationName changes
-    // Optionally, close the modal immediately or wait for detection
-    // onClose(); // Uncomment if you want modal to close immediately after clicking detect
-  };
+  const handleDetectLocation = useCallback(async () => {
+    setIsDetecting(true);
+    setManualLocationInput('Detecting...'); // Provide immediate feedback
+    try {
+      const detectedName = await onDetectLocation();
+      if (detectedName) {
+        setManualLocationInput(detectedName); // Update with the actual name
+      }
+      // Optionally close modal after detection, or let user confirm
+      // onClose(); 
+    } catch (error) {
+      console.error("Error in modal detect location:", error);
+      setManualLocationInput(currentLocationName || "Detection failed"); // Revert or show error
+    } finally {
+      setIsDetecting(false);
+    }
+  }, [onDetectLocation, onClose, currentLocationName]);
+
 
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <MapPin className="mr-2 h-5 w-5" /> Set Your Location
           </DialogTitle>
           <DialogDescription>
-            Enter your area or use GPS to find nearby services. Current: {currentLocationName || "Not set"}
+            Enter your area or use GPS. Current: {isLoadingLocation && !currentLocationName ? "Loading..." : (currentLocationName || "Not set")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -78,19 +98,25 @@ export function LocationModal({
               onChange={(e) => setManualLocationInput(e.target.value)}
               placeholder="e.g., Villupuram, Anna Nagar"
               className="col-span-3"
+              disabled={isDetecting}
             />
           </div>
-          <Button variant="outline" onClick={handleDetectLocation} className="w-full">
-            <RefreshCw className="mr-2 h-4 w-4" /> Detect Current Location (GPS)
+          <Button variant="outline" onClick={handleDetectLocation} className="w-full" disabled={isDetecting || isLoadingLocation}>
+            {isDetecting || (isLoadingLocation && !currentLocationName && manualLocationInput === 'Detecting...') ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            {isDetecting || (isLoadingLocation && !currentLocationName && manualLocationInput === 'Detecting...') ? 'Detecting...' : 'Detect Current Location (GPS)'}
           </Button>
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="button" variant="secondary">
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
           </DialogClose>
-          <Button type="submit" onClick={handleSubmit} disabled={!manualLocationInput.trim()}>
+          <Button type="submit" onClick={handleSubmit} disabled={!manualLocationInput.trim() || isDetecting || manualLocationInput === 'Detecting...'}>
             Set Location
           </Button>
         </DialogFooter>

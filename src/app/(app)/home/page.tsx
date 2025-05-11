@@ -18,7 +18,7 @@ export default function HomePage() {
     isLoading: isLoadingLocation, 
     error: locationError, 
     setManualLocation,
-    refreshLocation
+    detectLocationForModal // Use the new function for modal
   } = useLocation();
 
   const filteredMedicalStores = useMemo(() => {
@@ -43,7 +43,7 @@ export default function HomePage() {
         currentLocationName={currentLocationName}
         isLoadingLocation={isLoadingLocation}
         onSetLocation={setManualLocation}
-        onDetectLocation={refreshLocation}
+        onDetectLocation={detectLocationForModal} // Pass the correct function
       />
       <SearchAndFilter
         searchTerm={searchTerm}
@@ -67,7 +67,7 @@ export default function HomePage() {
         )}
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">Nearby Medical Stores</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary-foreground">Nearby Medical Stores</h2>
           {filteredMedicalStores.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredMedicalStores.map(store => (
@@ -80,7 +80,7 @@ export default function HomePage() {
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4 text-primary">Nearby Hospitals</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-primary-foreground">Nearby Hospitals</h2>
           {filteredHospitals.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredHospitals.map(hospital => (
@@ -95,4 +95,3 @@ export default function HomePage() {
     </div>
   );
 }
-
