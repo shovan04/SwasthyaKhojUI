@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -19,7 +20,12 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-md z-50">
       <div className="flex justify-around items-center h-16 max-w-5xl mx-auto">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href === '/home' && pathname === '/');
+          let isActive = pathname === item.href || (item.href === '/home' && pathname === '/');
+          
+          if (item.href === '/maps') {
+            isActive = isActive || pathname.startsWith('/hospitals/') || pathname.startsWith('/medical-stores/');
+          }
+
           return (
             <Link href={item.href} key={item.href} legacyBehavior>
               <a
@@ -39,3 +45,4 @@ export function BottomNav() {
     </nav>
   );
 }
+
