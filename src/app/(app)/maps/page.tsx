@@ -1,53 +1,51 @@
 
 "use client";
 
+import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 import { useLocation } from '@/hooks/use-location';
-import { MapPreview } from '@/components/details/MapPreview';
+import LeafletMapDisplay from '@/components/maps/LeafletMapDisplay'; // Import the new Leaflet map component
 import { EntityCard } from '@/components/home/EntityCard';
-import { mockHospitals, mockMedicalStores } from '@/lib/data';
+import { mockHospitals, mockMedicalStores, allFacilities } from '@/lib/data'; // Use allFacilities
 import type { Facility } from '@/lib/types';
-import { Loader2, MapPin, Hospital as HospitalIcon, Store as StoreIcon } from 'lucide-react'; // Renamed icons to avoid conflict
+import { Loader2, MapPin, Hospital as HospitalIcon, Store as StoreIcon } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function MapsPage() {
-  const { currentLocationName, isLoading: isLoadingLocation, error: locationError } = useLocation();
+  const { currentLocationName, currentCoordinates, isLoading: isLoadingLocation, error: locationError } = useLocation();
 
-  // Loading state for location
   if (isLoadingLocation && !currentLocationName) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-9rem)] p-4 text-center"> {/* Adjusted for header and bottom nav */}
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem-4rem)] p-4 text-center">
         <Loader2 className="w-12 h-12 text-primary mb-4 animate-spin" />
         <p className="text-lg text-muted-foreground">Loading map and nearby facilities...</p>
       </div>
     );
   }
 
-  const mapPreviewImageUrl = `https://picsum.photos/seed/${encodeURIComponent(currentLocationName || 'defaultmapseed')}/800/400`;
-
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl space-y-8">
       {locationError && (
         <Alert variant="destructive" className="mb-6">
           <AlertTitle>Location Error</AlertTitle>
-          <AlertDescription>{locationError} Showing default lists.</AlertDescription>
+          <AlertDescription>{locationError} Showing default lists or last known location.</AlertDescription>
         </Alert>
       )}
       
-      {/* Map View Section */}
       <section>
         <div className="flex items-center mb-4">
           <MapPin className="w-6 h-6 text-primary mr-3 shrink-0" />
           <h1 className="text-2xl font-semibold text-primary-foreground">
-            Your Current Area: {currentLocationName || (isLoadingLocation ? "Loading..." : "Default Area")}
+            Your Current Area: {currentLocationName || (isLoadingLocation ? "Detecting..." : "Default Area")}
           </h1>
         </div>
-        <MapPreview 
-          imageUrl={mapPreviewImageUrl} 
-          altText={`Map of ${currentLocationName || 'current area'}`} 
+        {/* Replace MapPreview with LeafletMapDisplay */}
+        <LeafletMapDisplay 
+          centerCoordinates={currentCoordinates} 
+          facilities={allFacilities} // Pass combined facilities
+          userLocationName={currentLocationName}
         />
       </section>
 
-      {/* Nearby Hospitals Section */}
       <section>
         <div className="flex items-center mb-4">
           <HospitalIcon className="w-6 h-6 text-primary mr-3 shrink-0" />
@@ -64,7 +62,6 @@ export default function MapsPage() {
         )}
       </section>
 
-      {/* Nearby Medical Stores Section */}
       <section>
         <div className="flex items-center mb-4">
           <StoreIcon className="w-6 h-6 text-primary mr-3 shrink-0" />

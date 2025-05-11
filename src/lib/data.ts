@@ -6,6 +6,9 @@ const commonDoctors: Doctor[] = [
   { id: 'doc3', name: 'Dr. Anjali Singh', specialization: 'Dentist', timings: 'Mon, Wed, Fri: 2 PM - 7 PM' },
 ];
 
+// Example coordinates for Villupuram area
+const villupuramCenter = { latitude: 11.9416, longitude: 79.4950 };
+
 export const mockMedicalStores: MedicalStore[] = [
   {
     id: 'ms1',
@@ -15,8 +18,9 @@ export const mockMedicalStores: MedicalStore[] = [
     distance: '1.2 km',
     type: 'medical-store',
     services: ['24/7 Pharmacy', 'Medicine Home Delivery', 'Health Checkups'],
-    mapImageUrl: 'https://picsum.photos/600/400',
+    mapImageUrl: 'https://picsum.photos/seed/ms1/600/400',
     doctors: [commonDoctors[0]],
+    coordinates: { latitude: villupuramCenter.latitude + 0.01, longitude: villupuramCenter.longitude - 0.01 }, // Offset for variation
   },
   {
     id: 'ms2',
@@ -26,7 +30,8 @@ export const mockMedicalStores: MedicalStore[] = [
     distance: '3.5 km',
     type: 'medical-store',
     services: ['Generic Medicines', 'Surgical Supplies'],
-    mapImageUrl: 'https://picsum.photos/600/400',
+    mapImageUrl: 'https://picsum.photos/seed/ms2/600/400',
+    coordinates: { latitude: villupuramCenter.latitude - 0.005, longitude: villupuramCenter.longitude + 0.015 },
   },
   {
     id: 'ms3',
@@ -36,10 +41,11 @@ export const mockMedicalStores: MedicalStore[] = [
     distance: '0.8 km',
     type: 'medical-store',
     services: ['Ayurvedic Medicines', 'Consultation Available'],
-    mapImageUrl: 'https://picsum.photos/600/400',
+    mapImageUrl: 'https://picsum.photos/seed/ms3/600/400',
     doctors: [
       { id: 'doc4', name: 'Vaidya Ram Kishore', specialization: 'Ayurveda', timings: 'Mon-Sat: 9 AM - 1 PM' }
     ],
+    coordinates: { latitude: villupuramCenter.latitude + 0.002, longitude: villupuramCenter.longitude + 0.005 },
   },
 ];
 
@@ -54,7 +60,8 @@ export const mockHospitals: Hospital[] = [
     departments: ['General Medicine', 'Surgery', 'Maternity', 'Emergency'],
     emergencyHotline: '102',
     doctors: [...commonDoctors, { id: 'doc5', name: 'Dr. Suresh Gupta', specialization: 'Cardiologist', timings: 'Mon, Wed: 10 AM - 2 PM' }],
-    mapImageUrl: 'https://picsum.photos/600/400',
+    mapImageUrl: 'https://picsum.photos/seed/h1/600/400',
+    coordinates: { latitude: villupuramCenter.latitude - 0.02, longitude: villupuramCenter.longitude - 0.02 },
   },
   {
     id: 'h2',
@@ -65,7 +72,8 @@ export const mockHospitals: Hospital[] = [
     type: 'hospital',
     departments: ['General OPD', 'Vaccination', 'Basic Lab Tests'],
     doctors: [commonDoctors[0], commonDoctors[1]],
-    mapImageUrl: 'https://picsum.photos/600/400',
+    mapImageUrl: 'https://picsum.photos/seed/h2/600/400',
+    coordinates: { latitude: villupuramCenter.latitude + 0.015, longitude: villupuramCenter.longitude + 0.01 },
   },
   {
     id: 'h3',
@@ -79,7 +87,8 @@ export const mockHospitals: Hospital[] = [
       commonDoctors[1],
       { id: 'doc6', name: 'Dr. Maria Fernandez', specialization: 'Gynaecologist', timings: 'Tue, Thu: 3 PM - 6 PM' }
     ],
-    mapImageUrl: 'https://picsum.photos/600/400',
+    mapImageUrl: 'https://picsum.photos/seed/h3/600/400',
+    coordinates: { latitude: villupuramCenter.latitude - 0.01, longitude: villupuramCenter.longitude + 0.02 },
   },
 ];
 
