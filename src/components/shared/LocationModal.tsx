@@ -14,14 +14,14 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { MapPin } from 'lucide-react';
+import { MapPin, RefreshCw } from 'lucide-react'; // Added RefreshCw for detect location button
 
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentLocationName: string | null;
   onSetLocation: (locationName: string) => void;
-  onDetectLocation: () => void;
+  onDetectLocation: () => void; // This should trigger the location detection logic in the hook
 }
 
 export function LocationModal({
@@ -31,20 +31,28 @@ export function LocationModal({
   onSetLocation,
   onDetectLocation,
 }: LocationModalProps) {
-  const [manualLocation, setManualLocation] = useState(currentLocationName || '');
+  const [manualLocationInput, setManualLocationInput] = useState('');
+
+  // Update the input field when the modal opens or the currentLocationName prop changes
+  useEffect(() => {
+    if (isOpen) {
+      setManualLocationInput(currentLocationName || '');
+    }
+  }, [isOpen, currentLocationName]);
 
   const handleSubmit = () => {
-    if (manualLocation.trim()) {
-      onSetLocation(manualLocation.trim());
+    if (manualLocationInput.trim()) {
+      onSetLocation(manualLocationInput.trim());
       onClose();
     }
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      setManualLocation(currentLocationName || '');
-    }
-  }, [isOpen, currentLocationName]);
+  const handleDetectLocation = () => {
+    onDetectLocation(); // Call the hook's function to detect location
+    // The input field will update via useEffect when currentLocationName changes
+    // Optionally, close the modal immediately or wait for detection
+    // onClose(); // Uncomment if you want modal to close immediately after clicking detect
+  };
 
   if (!isOpen) return null;
 
@@ -56,7 +64,7 @@ export function LocationModal({
             <MapPin className="mr-2 h-5 w-5" /> Set Your Location
           </DialogTitle>
           <DialogDescription>
-            Enter your area or use GPS to find nearby services.
+            Enter your area or use GPS to find nearby services. Current: {currentLocationName || "Not set"}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -66,14 +74,14 @@ export function LocationModal({
             </Label>
             <Input
               id="location"
-              value={manualLocation}
-              onChange={(e) => setManualLocation(e.target.value)}
+              value={manualLocationInput}
+              onChange={(e) => setManualLocationInput(e.target.value)}
               placeholder="e.g., Villupuram, Anna Nagar"
               className="col-span-3"
             />
           </div>
-          <Button variant="outline" onClick={() => { onDetectLocation(); }} className="w-full">
-            <MapPin className="mr-2 h-4 w-4" /> Use Current Location (GPS)
+          <Button variant="outline" onClick={handleDetectLocation} className="w-full">
+            <RefreshCw className="mr-2 h-4 w-4" /> Detect Current Location (GPS)
           </Button>
         </div>
         <DialogFooter>
@@ -82,7 +90,7 @@ export function LocationModal({
               Cancel
             </Button>
           </DialogClose>
-          <Button type="submit" onClick={handleSubmit}>
+          <Button type="submit" onClick={handleSubmit} disabled={!manualLocationInput.trim()}>
             Set Location
           </Button>
         </DialogFooter>
@@ -90,4 +98,3 @@ export function LocationModal({
     </Dialog>
   );
 }
-
