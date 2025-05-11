@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -5,7 +6,7 @@ import type { Facility } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Phone, Hospital, Store } from 'lucide-react';
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
 interface EntityCardProps {
   entity: Facility;
@@ -15,14 +16,9 @@ export function EntityCard({ entity }: EntityCardProps) {
   const Icon = entity.type === 'hospital' ? Hospital : Store;
   const detailLink = entity.type === 'hospital' ? `/hospitals/${entity.id}` : `/medical-stores/${entity.id}`;
 
-  const handleCallClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.stopPropagation(); // Prevent Link navigation when call button is clicked
-    window.location.href = `tel:${entity.phone}`;
-  };
-
   return (
     <Link href={detailLink} passHref legacyBehavior>
-      <a className="block h-full">
+      <a className="block h-full"> {/* Outer <a> from Link */}
         <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full bg-card">
           <CardHeader className="p-4 pb-2 flex-row items-start justify-between">
             <div>
@@ -37,20 +33,17 @@ export function EntityCard({ entity }: EntityCardProps) {
               )}
             </div>
             <Button
-              asChild
               variant="default"
               size="icon"
               className="ml-auto shrink-0 bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10"
               onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                // This onClick is for the visual button wrapper for Button component behavior, 
-                // actual call is handled by the anchor tag's onClick below
-                e.stopPropagation(); 
+                e.stopPropagation(); // Prevent Link navigation
+                e.preventDefault(); // Also prevent default button behavior if any, though Link's navigation is main concern
+                window.location.href = `tel:${entity.phone}`; // Initiate call
               }}
               aria-label={`Call ${entity.name}`}
             >
-              <a href={`tel:${entity.phone}`} onClick={handleCallClick} >
-                <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
-              </a>
+              <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </CardHeader>
           <CardContent className="p-4 pt-0 flex-grow">
@@ -67,3 +60,4 @@ export function EntityCard({ entity }: EntityCardProps) {
     </Link>
   );
 }
+
