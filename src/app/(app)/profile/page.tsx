@@ -1,11 +1,13 @@
 
 "use client";
 
-import { UserCircle2, Settings, LogIn, Mail, Phone as PhoneIcon, Droplets, Calendar } from 'lucide-react';
+import { UserCircle2, Settings, LogOut, Mail, Phone as PhoneIcon, Droplets, Calendar } from 'lucide-react'; // Changed LogIn to LogOut
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+// import Link from 'next/link'; // Link might not be needed if logout is an action
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast'; // For showing logout toast
+
 
 interface UserProfile {
   name: string;
@@ -39,6 +41,18 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 
 
 export default function ProfilePage() {
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    // Implement actual logout logic here (e.g., clear session, redirect)
+    console.log("Logout action triggered");
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    // Example: router.push('/login');
+  };
+
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-4rem-4rem)] p-4 md:p-6 space-y-6">
       <div className="flex flex-col items-center text-center">
@@ -69,15 +83,14 @@ export default function ProfilePage() {
       </Card>
       
       <div className="space-y-3 w-full max-w-md">
-        <Button variant="outline" className="w-full justify-start">
+        <Button variant="outline" className="w-full justify-start" disabled>
           <Settings className="mr-2 h-5 w-5" /> Account Settings (Coming Soon)
         </Button>
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <Link href="/admin/login">
-            <LogIn className="mr-2 h-5 w-5" /> Admin/Staff Login
-          </Link>
+        <Button variant="destructive" className="w-full justify-start" onClick={handleLogout}>
+          <LogOut className="mr-2 h-5 w-5" /> Logout
         </Button>
       </div>
     </div>
   );
 }
+
