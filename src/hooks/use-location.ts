@@ -19,7 +19,7 @@ async function getAreaNameFromCoordinates(coords: LocationCoordinates): Promise<
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'SwasthyaKhojApp/1.0 (your-email@example.com)' // Replace with your app info and contact
+        'User-Agent': 'SwasthyaKhojApp/1.0 (swasthyakhoj.app@example.com)' // Replace with your app info and contact
       }
     });
     if (!response.ok) {
@@ -27,13 +27,26 @@ async function getAreaNameFromCoordinates(coords: LocationCoordinates): Promise<
     }
     const data = await response.json();
 
-    if (data && data.display_name) {
-      return data.display_name;
-    } else if (data && data.address) {
-      // Fallback to constructing from address parts if display_name is not available
-      const { road, suburb, city, town, village, county, state, country } = data.address;
-      const parts = [road, suburb, city || town || village, county, state, country].filter(Boolean);
-      return parts.join(', ') || "Unknown Location";
+    if (data && data.address) {
+      const { road, village, town, city, suburb, neighbourhood, quarter, county, state } = data.address;
+      // Prioritize specific location parts for a shorter name
+      if (village) return village;
+      if (town) return town;
+      if (suburb) return suburb;
+      if (neighbourhood) return neighbourhood;
+      if (quarter) return quarter;
+      if (road) return road; // Road can sometimes be too specific or long, so placed after others
+      if (city) return city;
+      
+      // Fallback to more general parts if specific ones are not available, taking the first part.
+      const generalName = [county, state, data.display_name?.split(',')[0].trim()].filter(Boolean).join(', ');
+      if (generalName) return generalName.split(',')[0].trim();
+
+      return "Location Name Not Found";
+
+    } else if (data && data.display_name) {
+      // Fallback to the first part of display_name if address object is missing
+      return data.display_name.split(',')[0].trim();
     }
     return "Area Name Not Found";
   } catch (error) {
@@ -50,7 +63,7 @@ export function useLocation() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUserLocation = useCallback(async () => {
+  const fetchUserLocation = useCallback(async (isInitialLoad = false) => {
     setIsLoading(true);
     setError(null);
     if (typeof window !== 'undefined' && navigator.geolocation) {
@@ -70,40 +83,43 @@ export function useLocation() {
           setCurrentLocationName(areaName);
         } catch (geocodeError) {
           console.error("Reverse geocoding failed:", geocodeError);
-          // If geocoding fails, still show that location was detected but name is unavailable.
           setCurrentLocationName(`Detected: Lat ${coords.latitude.toFixed(2)}, Lon ${coords.longitude.toFixed(2)}`);
           setError("Could not fetch area name.");
         }
         
       } catch (err: any) {
         console.warn(`Geolocation ERROR(${err.code}): ${err.message}`);
-        // Fallback to default if permission denied or error
-        setCurrentLocationName(DEFAULT_LOCATION_NAME);
-        setCurrentCoordinates(DEFAULT_COORDS);
-        if (err.code === 1) { // PERMISSION_DENIED
-          setError("Location permission denied. Using default.");
+        if (isInitialLoad || !currentLocationName) { // Only set default if it's initial or no name yet
+            setCurrentLocationName(DEFAULT_LOCATION_NAME);
+            setCurrentCoordinates(DEFAULT_COORDS);
+        }
+        if (err.code === 1) { 
+          setError("Location permission denied. Using current or default.");
         } else {
-          setError("Could not detect location. Using default.");
+          setError("Could not detect location. Using current or default.");
         }
       } finally {
         setIsLoading(false);
       }
     } else {
-      // Geolocation not supported or not in browser
-      setCurrentLocationName(DEFAULT_LOCATION_NAME);
-      setCurrentCoordinates(DEFAULT_COORDS);
-      setError("Geolocation not supported. Using default.");
+      if (isInitialLoad || !currentLocationName) {
+        setCurrentLocationName(DEFAULT_LOCATION_NAME);
+        setCurrentCoordinates(DEFAULT_COORDS);
+      }
+      setError("Geolocation not supported. Using current or default.");
       setIsLoading(false);
     }
-  }, []);
+  }, [currentLocationName]);
 
   useEffect(() => {
+    // Fetch location only if it hasn't been set yet (e.g., on initial load)
     if (currentLocationName === null) {
-      fetchUserLocation();
+      fetchUserLocation(true); // Pass true for initial load
     } else {
-      setIsLoading(false);
+      setIsLoading(false); // If already have a location, not loading
     }
-  }, [fetchUserLocation, currentLocationName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount or when fetchUserLocation changes (which it shouldn't often)
 
   const setManualLocation = useCallback(async (name: string, coords?: LocationCoordinates) => {
     setIsLoading(true);
@@ -111,13 +127,8 @@ export function useLocation() {
     if (coords) {
       setCurrentCoordinates(coords);
     } else {
-      // If no coords provided for manual name, try to geocode the name
-      // This is a forward geocoding step, which is more complex.
-      // For now, we'll just set the name and clear/keep coordinates.
-      // In a real app, you'd call a forward geocoding API here.
-      // For simplicity, if no coords, let's clear them.
       setCurrentCoordinates(null); 
-      console.warn("Manual location set without coordinates. Consider implementing forward geocoding.");
+      console.warn("Manual location set without coordinates.");
     }
     setIsLoading(false);
     setError(null);
@@ -137,25 +148,32 @@ export function useLocation() {
             };
             setCurrentCoordinates(coords);
             const areaName = await getAreaNameFromCoordinates(coords);
-            setCurrentLocationName(areaName); // This will update the state used by the modal
-            return areaName; // Return the name for the modal to use directly
-        } catch (err) {
+            setCurrentLocationName(areaName);
+            return areaName; 
+        } catch (err: any) {
             console.warn("Error detecting location for modal update:", err);
-            setCurrentLocationName(DEFAULT_LOCATION_NAME); // Fallback
-            setCurrentCoordinates(DEFAULT_COORDS);
-            setError("Could not detect location. Using default.");
-            return DEFAULT_LOCATION_NAME;
+            const fallbackName = currentLocationName || DEFAULT_LOCATION_NAME;
+            setCurrentLocationName(fallbackName); 
+            if (!currentCoordinates && !currentLocationName) setCurrentCoordinates(DEFAULT_COORDS);
+
+            if (err.code === 1) {
+              setError("Location permission denied by user.");
+            } else {
+              setError("Could not detect location for update.");
+            }
+            return fallbackName;
         } finally {
             setIsLoading(false);
         }
     } else {
-        setCurrentLocationName(DEFAULT_LOCATION_NAME);
-        setCurrentCoordinates(DEFAULT_COORDS);
+        const fallbackName = currentLocationName || DEFAULT_LOCATION_NAME;
+        setCurrentLocationName(fallbackName);
+        if (!currentCoordinates && !currentLocationName) setCurrentCoordinates(DEFAULT_COORDS);
         setError("Geolocation not supported.");
         setIsLoading(false);
-        return DEFAULT_LOCATION_NAME;
+        return fallbackName;
     }
-  }, [setIsLoading, setError, setCurrentCoordinates, setCurrentLocationName]);
+  }, [setIsLoading, setError, setCurrentCoordinates, setCurrentLocationName, currentLocationName, currentCoordinates]);
 
 
   return { 
@@ -164,7 +182,8 @@ export function useLocation() {
     isLoading, 
     error, 
     setManualLocation, 
-    refreshLocation: fetchUserLocation,
+    refreshLocation: () => fetchUserLocation(false), // Pass false for non-initial refresh
     detectLocationForModal: handleDetectLocationAndUpdateModal 
   };
 }
+
