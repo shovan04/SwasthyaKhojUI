@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useParams, notFound } from 'next/navigation';
@@ -55,7 +56,7 @@ export default function MedicalStoreDetailsPage() {
           <div className="flex items-center mb-2">
             <Store className="w-8 h-8 mr-3 text-primary" />
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-primary-foreground">{store.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-card-foreground">{store.name}</h1>
               <p className="text-sm text-muted-foreground">Medical Store</p>
             </div>
           </div>
