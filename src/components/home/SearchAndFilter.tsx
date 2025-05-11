@@ -12,12 +12,12 @@ interface SearchAndFilterProps {
 
 export function SearchAndFilter({ searchTerm, onSearchChange, onFilterClick }: SearchAndFilterProps) {
   return (
-    <div className="p-4 bg-card sticky top-16 z-30 shadow-sm">
+    <div className="p-4 bg-card sticky top-[calc(5rem)] z-30 shadow-sm"> {/* Adjusted top for taller header (h-20 = 5rem) */}
       <div className="relative flex items-center gap-2 max-w-5xl mx-auto">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search for stores, hospitals, doctors..."
+          placeholder="ডাক্তার বা হাসপাতাল খুঁজুন..." // Updated placeholder
           className="pl-10 pr-4 py-2 w-full rounded-lg"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}

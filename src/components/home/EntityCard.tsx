@@ -1,9 +1,11 @@
+"use client";
+
 import Link from 'next/link';
-import Image from 'next/image';
 import type { Facility } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, Phone, Hospital, Store } from 'lucide-react';
+import { MouseEvent } from 'react';
 
 interface EntityCardProps {
   entity: Facility;
@@ -13,40 +15,55 @@ export function EntityCard({ entity }: EntityCardProps) {
   const Icon = entity.type === 'hospital' ? Hospital : Store;
   const detailLink = entity.type === 'hospital' ? `/hospitals/${entity.id}` : `/medical-stores/${entity.id}`;
 
+  const handleCallClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation(); // Prevent Link navigation when call button is clicked
+    window.location.href = `tel:${entity.phone}`;
+  };
+
   return (
-    <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
-      <CardHeader className="p-4">
-        <div className="flex items-start justify-between">
-          <CardTitle className="text-lg font-semibold leading-tight flex items-center">
-            <Icon className="w-5 h-5 mr-2 text-primary shrink-0" />
-            {entity.name}
-          </CardTitle>
-          {entity.distance && (
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full whitespace-nowrap">
-              {entity.distance}
-            </span>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 flex-grow">
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-start">
-            <MapPin className="w-4 h-4 mr-2 mt-0.5 shrink-0" />
-            <p>{entity.address}</p>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 bg-card-foreground/5 border-t flex flex-col sm:flex-row sm:justify-between gap-2">
-        <Button asChild variant="outline" className="w-full sm:w-auto">
-          <a href={`tel:${entity.phone}`}>
-            <Phone className="mr-2 h-4 w-4" />
-            Call Now
-          </a>
-        </Button>
-        <Button asChild className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground">
-          <Link href={detailLink}>View Details</Link>
-        </Button>
-      </CardFooter>
-    </Card>
+    <Link href={detailLink} passHref legacyBehavior>
+      <a className="block h-full">
+        <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full bg-card">
+          <CardHeader className="p-4 pb-2 flex-row items-start justify-between">
+            <div>
+              <CardTitle className="text-base sm:text-lg font-semibold leading-tight flex items-center">
+                <Icon className="w-5 h-5 mr-2 text-primary shrink-0" />
+                {entity.name}
+              </CardTitle>
+              {entity.distance && (
+                <span className="text-xs text-muted-foreground mt-1">
+                  {entity.distance}
+                </span>
+              )}
+            </div>
+            <Button
+              asChild
+              variant="default"
+              size="icon"
+              className="ml-auto shrink-0 bg-primary hover:bg-primary/90 w-9 h-9 sm:w-10 sm:h-10"
+              onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                // This onClick is for the visual button wrapper for Button component behavior, 
+                // actual call is handled by the anchor tag's onClick below
+                e.stopPropagation(); 
+              }}
+              aria-label={`Call ${entity.name}`}
+            >
+              <a href={`tel:${entity.phone}`} onClick={handleCallClick} >
+                <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
+              </a>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 flex-grow">
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <div className="flex items-start">
+                <MapPin className="w-4 h-4 mr-2 mt-0.5 shrink-0" />
+                <p className="text-xs sm:text-sm">{entity.address}</p>
+              </div>
+            </div>
+          </CardContent>
+          {/* Removed explicit View Details and Call Now text buttons from footer */}
+        </Card>
+      </a>
+    </Link>
   );
 }

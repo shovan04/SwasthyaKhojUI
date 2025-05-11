@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useState } from 'react';
-import { MapPin, Edit3 } from 'lucide-react';
+import { MapPin } from 'lucide-react'; // Removed Edit3 as it's not in the example's header style
 import { Button } from '@/components/ui/button';
 import { LocationModal } from '@/components/shared/LocationModal';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,7 +11,7 @@ interface AppHeaderProps {
   currentLocationName: string | null;
   isLoadingLocation: boolean;
   onSetLocation: (locationName: string) => void;
-  onDetectLocation: () => Promise<string | void>; // Now expects a promise
+  onDetectLocation: () => Promise<string | void>;
 }
 
 export function AppHeader({
@@ -25,29 +24,32 @@ export function AppHeader({
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Logo className="hidden sm:flex" />
-        <div className="sm:hidden text-lg font-semibold text-primary">SwasthyaKhoj</div>
-
-
-        <div className="flex items-center space-x-2">
-          {isLoadingLocation && !currentLocationName ? (
-            <Skeleton className="h-6 w-32 rounded-md" />
-          ) : (
-            <Button
-              variant="ghost"
-              className="text-sm text-muted-foreground hover:text-foreground px-2 sm:px-3"
-              onClick={() => setIsLocationModalOpen(true)}
-              title="Change location"
-            >
-              <MapPin className="h-4 w-4 mr-1 shrink-0" />
-              <span className="truncate max-w-[100px] sm:max-w-[150px] md:max-w-[200px] inline">
-                {currentLocationName || 'Set Location'}
-              </span>
-              <Edit3 className="h-3 w-3 ml-1 sm:ml-2 text-muted-foreground/70 shrink-0" />
-            </Button>
-          )}
+      <div className="container flex h-20 items-center justify-between max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Logo/Brand - kept for consistency, though not prominent in example image's main screen */}
+        <div className="hidden sm:block">
+            <Logo className="hidden sm:flex" />
         </div>
+         <div className="sm:hidden text-lg font-semibold text-primary">SwasthyaKhoj</div>
+
+
+        <Button
+          variant="ghost"
+          className="flex flex-col items-start h-auto p-1 text-left"
+          onClick={() => setIsLocationModalOpen(true)}
+          title="Change location"
+        >
+          <div className="flex items-center text-xs text-muted-foreground">
+            <MapPin className="h-3 w-3 mr-1 shrink-0" />
+            আপনার বর্তমান অবস্থান
+          </div>
+          {isLoadingLocation && !currentLocationName ? (
+            <Skeleton className="h-5 w-32 mt-1 rounded-md" />
+          ) : (
+            <span className="text-sm font-medium text-foreground truncate max-w-[150px] sm:max-w-[200px] md:max-w-[250px]">
+              {currentLocationName || 'Set Location'}
+            </span>
+          )}
+        </Button>
       </div>
       <LocationModal
         isOpen={isLocationModalOpen}
