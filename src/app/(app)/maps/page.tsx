@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
@@ -13,7 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 export default function MapsPage() {
   const { currentLocationName, currentCoordinates, isLoading: isLoadingLocation, error: locationError } = useLocation();
 
-  if (isLoadingLocation && !currentLocationName) {
+  if (isLoadingLocation && !currentLocationName && !currentCoordinates) { // Check coords too
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem-4rem)] p-4 text-center">
         <Loader2 className="w-12 h-12 text-primary mb-4 animate-spin" />
@@ -34,14 +33,15 @@ export default function MapsPage() {
       <section>
         <div className="flex items-center mb-4">
           <MapPin className="w-6 h-6 text-primary mr-3 shrink-0" />
-          <h1 className="text-2xl font-semibold text-primary-foreground">
-            Your Current Area: {currentLocationName || (isLoadingLocation ? "Detecting..." : "Default Area")}
+          <h1 className="text-2xl font-semibold">
+            <span className="text-muted-foreground">Your Current Area: </span>
+            <span className="text-primary">{currentLocationName || (isLoadingLocation ? "Detecting..." : "Default Area")}</span>
           </h1>
         </div>
-        {/* Replace MapPreview with LeafletMapDisplay */}
+        
         <LeafletMapDisplay 
           centerCoordinates={currentCoordinates} 
-          facilities={allFacilities} // Pass combined facilities
+          facilities={allFacilities} 
           userLocationName={currentLocationName}
         />
       </section>
@@ -49,7 +49,7 @@ export default function MapsPage() {
       <section>
         <div className="flex items-center mb-4">
           <HospitalIcon className="w-6 h-6 text-primary mr-3 shrink-0" />
-          <h2 className="text-xl font-semibold text-primary-foreground">Nearby Hospitals</h2>
+          <h2 className="text-xl font-semibold text-foreground">Nearby Hospitals</h2>
         </div>
         {mockHospitals.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -65,7 +65,7 @@ export default function MapsPage() {
       <section>
         <div className="flex items-center mb-4">
           <StoreIcon className="w-6 h-6 text-primary mr-3 shrink-0" />
-          <h2 className="text-xl font-semibold text-primary-foreground">Nearby Medical Stores</h2>
+          <h2 className="text-xl font-semibold text-foreground">Nearby Medical Stores</h2>
         </div>
         {mockMedicalStores.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
