@@ -1,13 +1,31 @@
+
 "use client";
 
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 import { useLocation } from '@/hooks/use-location';
-import LeafletMapDisplay from '@/components/maps/LeafletMapDisplay'; // Import the new Leaflet map component
+// import LeafletMapDisplay from '@/components/maps/LeafletMapDisplay'; // Old static import
 import { EntityCard } from '@/components/home/EntityCard';
 import { mockHospitals, mockMedicalStores, allFacilities } from '@/lib/data'; // Use allFacilities
 import type { Facility } from '@/lib/types';
 import { Loader2, MapPin, Hospital as HospitalIcon, Store as StoreIcon } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import dynamic from 'next/dynamic';
+import type { ComponentType } from 'react';
+import type { LeafletMapDisplayProps } from '@/components/maps/LeafletMapDisplay'; // Import props type
+
+const LeafletMapDisplay: ComponentType<LeafletMapDisplayProps> = dynamic(
+  () => import('@/components/maps/LeafletMapDisplay'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-64 md:h-96 bg-muted rounded-lg shadow">
+        <Loader2 className="w-8 h-8 text-primary animate-spin mr-2" />
+        <p className="text-muted-foreground">Loading map...</p>
+      </div>
+    )
+  }
+);
+
 
 export default function MapsPage() {
   const { currentLocationName, currentCoordinates, isLoading: isLoadingLocation, error: locationError } = useLocation();
@@ -80,3 +98,4 @@ export default function MapsPage() {
     </div>
   );
 }
+
