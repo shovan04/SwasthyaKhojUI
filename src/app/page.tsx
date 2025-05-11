@@ -19,7 +19,7 @@ export default function SplashScreen() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4">
       <div className="flex flex-col items-center text-center animate-fadeIn">
         <Logo className="mb-6" />
-        <p className="text-xl font-medium text-primary-foreground/80">
+        <p className="text-2xl font-medium text-primary">
           স্বাস্থ্য এখন আপনার হাতের মুঠোয়
         </p>
         <p className="text-sm text-muted-foreground mt-1">
