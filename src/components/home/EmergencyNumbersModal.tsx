@@ -50,7 +50,7 @@ export function EmergencyNumbersModal({ isOpen, onClose }: EmergencyNumbersModal
           {emergencyContactsIndia.map((contact) => (
             <div key={contact.name} className="flex items-center justify-between p-3 bg-background rounded-lg shadow-sm">
               <div>
-                <p className="font-medium text-primary-foreground">{contact.name}</p>
+                <p className="font-medium text-foreground">{contact.name}</p>
                 <p className="text-lg font-semibold text-accent">{contact.number}</p>
               </div>
               <Button variant="outline" size="sm" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
@@ -72,3 +72,4 @@ export function EmergencyNumbersModal({ isOpen, onClose }: EmergencyNumbersModal
     </Dialog>
   );
 }
+
