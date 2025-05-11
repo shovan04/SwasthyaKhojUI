@@ -36,7 +36,7 @@ export function EmergencyNumbersModal({ isOpen, onClose }: EmergencyNumbersModal
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="sm:max-w-md bg-card text-card-foreground">
+      <DialogContent className="sm:max-w-md bg-card text-card-foreground rounded-lg p-4 md:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center text-xl">
             <Siren className="mr-2 h-6 w-6 text-destructive" />
@@ -66,4 +66,3 @@ export function EmergencyNumbersModal({ isOpen, onClose }: EmergencyNumbersModal
     </Dialog>
   );
 }
-

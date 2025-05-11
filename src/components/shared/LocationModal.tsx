@@ -14,14 +14,14 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { MapPin, RefreshCw, Loader2 } from 'lucide-react'; // Added RefreshCw for detect location button
+import { MapPin, RefreshCw, Loader2 } from 'lucide-react'; 
 
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentLocationName: string | null;
   onSetLocation: (locationName: string) => void;
-  onDetectLocation: () => Promise<string | void>; // Changed to Promise to handle async name update
+  onDetectLocation: () => Promise<string | void>; 
   isLoadingLocation: boolean;
 }
 
@@ -38,12 +38,10 @@ export function LocationModal({
 
   useEffect(() => {
     if (isOpen) {
-      // Only update input if not currently detecting, to avoid overwriting "Detecting..."
       if (!isDetecting) {
         setManualLocationInput(currentLocationName || '');
       }
     } else {
-      // Reset detecting state when modal closes
       setIsDetecting(false);
     }
   }, [isOpen, currentLocationName, isDetecting]);
@@ -57,21 +55,19 @@ export function LocationModal({
 
   const handleDetectLocation = useCallback(async () => {
     setIsDetecting(true);
-    setManualLocationInput('Detecting...'); // Provide immediate feedback
+    setManualLocationInput('Detecting...'); 
     try {
       const detectedName = await onDetectLocation();
       if (detectedName) {
-        setManualLocationInput(detectedName); // Update with the actual name
+        setManualLocationInput(detectedName); 
       }
-      // Optionally close modal after detection, or let user confirm
-      // onClose(); 
     } catch (error) {
       console.error("Error in modal detect location:", error);
-      setManualLocationInput(currentLocationName || "Detection failed"); // Revert or show error
+      setManualLocationInput(currentLocationName || "Detection failed"); 
     } finally {
       setIsDetecting(false);
     }
-  }, [onDetectLocation, onClose, currentLocationName]);
+  }, [onDetectLocation, currentLocationName]);
 
 
   if (!isOpen) return null;
@@ -110,7 +106,7 @@ export function LocationModal({
             {isDetecting || (isLoadingLocation && !currentLocationName && manualLocationInput === 'Detecting...') ? 'Detecting...' : 'Detect Current Location (GPS)'}
           </Button>
         </div>
-        <DialogFooter>
+        <DialogFooter className="space-y-2 sm:space-y-0">
           <DialogClose asChild>
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
