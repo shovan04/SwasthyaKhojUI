@@ -1,14 +1,15 @@
+
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Map, ListChecks, UserCircle2, BriefcaseMedical } from 'lucide-react'; // Added BriefcaseMedical for Booking
+import { Home, Map, BriefcaseMedical, UserCircle2 } from 'lucide-react'; // Corrected import for Booking Icon
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/home', label: 'Home', icon: Home },
   { href: '/maps', label: 'Maps', icon: Map },
-  { href: '/booking', label: 'Booking', icon: BriefcaseMedical }, // Changed to BriefcaseMedical
+  { href: '/booking', label: 'Booking', icon: BriefcaseMedical },
   { href: '/profile', label: 'Profile', icon: UserCircle2 },
 ];
 
@@ -16,7 +17,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-md md:hidden z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-md z-50">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href === '/home' && pathname === '/'); // Treat / as /home
@@ -39,3 +40,4 @@ export function BottomNav() {
     </nav>
   );
 }
+
