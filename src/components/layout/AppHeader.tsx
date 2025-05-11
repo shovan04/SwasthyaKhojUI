@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -39,8 +40,8 @@ export function AppHeader({
               onClick={() => setIsLocationModalOpen(true)}
               title="Change location"
             >
-              <MapPin className="h-4 w-4 sm:mr-1 shrink-0" />
-              <span className="truncate max-w-[100px] sm:max-w-[150px] hidden sm:inline">
+              <MapPin className="h-4 w-4 mr-1 shrink-0" />
+              <span className="truncate max-w-[100px] sm:max-w-[150px] inline">
                 {currentLocationName || 'Set Location'}
               </span>
               <Edit3 className="h-3 w-3 ml-1 sm:ml-2 text-muted-foreground/70 shrink-0" />
@@ -58,3 +59,4 @@ export function AppHeader({
     </header>
   );
 }
+
