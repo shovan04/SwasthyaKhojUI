@@ -23,7 +23,7 @@ async function getAreaNameFromCoordinates(coords: LocationCoordinates): Promise<
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'SwasthyaKhojApp/1.0 (swasthyakhoj.app@example.com)'
+        'User-Agent': 'SwasthyaKhojApp/1.0 (swasthya-khoj-ui.vercel.app)'
       }
     });
 
