@@ -94,7 +94,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.png" sizes="any" />
         <link
           rel="icon"
           href="/icon?<generated>"
